@@ -1,0 +1,44 @@
+name: Offer text or an evaluation set / Proposer des textes ou un jeu d'évaluation
+description: Organisations and people who can help make the English and Canadian French stronger. / Pour les organismes et les personnes qui peuvent aider à renforcer l'anglais et le français canadien.
+labels: [data-offer]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you. Please don't attach the data here: describe it, and we'll follow up privately. / Merci. Ne joignez pas les données ici : décrivez-les, et nous ferons le suivi en privé.
+  - type: input
+    id: org
+    attributes:
+      label: Who is offering? / Qui propose ?
+      description: Organisation or person, and a contact we can reach. / Organisme ou personne, et un contact.
+    validations:
+      required: true
+  - type: textarea
+    id: what
+    attributes:
+      label: What is it? / De quoi s'agit-il ?
+      description: Kind of text (debates, public services, news, conversation...), language/variety (e.g. Québécois, Acadian, Franco-Ontarian, English), rough size. / Type de texte, variété de langue, taille approximative.
+    validations:
+      required: true
+  - type: dropdown
+    id: use
+    attributes:
+      label: How may it be used? / Utilisation permise
+      options:
+        - Training and calibration, commercial use allowed / Entraînement et calibrage, usage commercial permis
+        - Evaluation only / Évaluation seulement
+        - Not sure yet / Pas encore certain
+    validations:
+      required: true
+  - type: input
+    id: licence
+    attributes:
+      label: Licence or terms / Licence ou conditions
+      description: e.g. CC BY 4.0, Open Government Licence – Canada, written permission. / p. ex. CC BY 4.0, Licence du gouvernement ouvert – Canada, permission écrite.
+  - type: checkboxes
+    id: rights
+    attributes:
+      label: Rights / Droits
+      options:
+        - label: I have the right to offer this, or I can put you in touch with who does. / J'ai le droit de proposer ceci, ou je peux vous mettre en contact avec qui l'a.
+          required: true

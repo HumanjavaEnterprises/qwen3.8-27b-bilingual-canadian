@@ -1,0 +1,35 @@
+# Ollama Modelfile for Qwen3.8-27B Bilingual Canadian v1.
+#   ollama create qwen3.8-27b-bilingual-canadian -f Modelfile
+#   ollama run qwen3.8-27b-bilingual-canadian
+# Point FROM at the GGUF you downloaded (or use hf.co/HumanjavaEnterprises/Qwen3.8-27B-Bilingual-Canadian-GGUF:Q2_K_mix).
+FROM ./qwen3-8-27b-bilingual-canadian-v1-Q2_K_mix.gguf
+
+# No system prompt is required. Ask in English or French; it answers in the language you use.
+
+PARAMETER num_ctx 8192
+# Qwen's suggested sampling for thinking-off chat. Our published numbers use temperature 0.
+PARAMETER temperature 0.7
+PARAMETER top_p 0.8
+PARAMETER top_k 20
+
+# Qwen3 chat format with thinking off: the assistant turn opens with an empty think block, as in the original
+# template with enable_thinking=false. Without a TEMPLATE, Ollama falls back to a raw prompt: no chat formatting,
+# no stop token, and the model rambles. Tools and images are not supported in this template.
+TEMPLATE """{{- if .System }}<|im_start|>system
+{{ .System }}<|im_end|>
+{{ end }}
+{{- range $i, $_ := .Messages }}
+{{- if eq .Role "user" }}<|im_start|>user
+{{ .Content }}<|im_end|>
+{{ else if eq .Role "assistant" }}<|im_start|>assistant
+{{ .Content }}<|im_end|>
+{{ end }}
+{{- end }}<|im_start|>assistant
+<think>
+
+</think>
+
+"""
+PARAMETER stop "<|im_end|>"
+PARAMETER stop "<|im_start|>"
+PARAMETER stop "<|endoftext|>"

@@ -1,0 +1,11 @@
+{
+ "stop": [
+  "<|im_end|>",
+  "<|im_start|>",
+  "<|endoftext|>"
+ ],
+ "temperature": 0.7,
+ "top_p": 0.8,
+ "top_k": 20,
+ "num_ctx": 8192
+}

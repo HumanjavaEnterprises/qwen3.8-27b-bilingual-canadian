@@ -1,0 +1,43 @@
+name: Model got something wrong
+description: A wrong answer, poor French or English, or an answer in the wrong language
+title: "[answer] "
+labels: ["model-answer"]
+body:
+  - type: markdown
+    attributes:
+      value: Thanks! Real examples are the most useful thing you can send us. English or French is fine. Please don't paste private or personal information.
+  - type: dropdown
+    id: kind
+    attributes:
+      label: What went wrong
+      options:
+        - A factual or reasoning error
+        - Poor or unnatural French
+        - Canadian French usage it got wrong
+        - Poor or unnatural English
+        - It answered in the wrong language
+        - It ended its turn without answering
+        - It didn't follow an instruction
+        - Something else
+    validations: {required: true}
+  - type: textarea
+    id: prompt
+    attributes:
+      label: What you sent
+      description: The full prompt, exactly as sent, including any system prompt.
+    validations: {required: true}
+  - type: textarea
+    id: answer
+    attributes:
+      label: What it answered
+    validations: {required: true}
+  - type: textarea
+    id: expected
+    attributes:
+      label: What a good answer would have been
+  - type: input
+    id: version
+    attributes:
+      label: Version and runtime
+      description: e.g. Ollama vveerrgg/qwen3.8-27b-bilingual-canadian:v1, or the GGUF file + llama.cpp version
+    validations: {required: true}
