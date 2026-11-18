@@ -124,9 +124,11 @@ Full tables: [EVALS.md](https://github.com/HumanjavaEnterprises/qwen3.8-27b-bili
 - [QuebecLLM](https://huggingface.co/QuebecLLM) (Concordia CLaC lab and Université Laval, LREC 2026;
   [paper](https://arxiv.org/abs/2510.22747)): the first open Québec French language models, adapters for base models
   continued on Québec French text and measured on COLE.
+- [Chocolatine-2-14B-Instruct](https://huggingface.co/jpacifico/Chocolatine-2-14B-Instruct-v2.0.3): an openly licensed
+  English and French instruct model with GGUF files, scored by the COLE authors at full precision.
 
-This build adds what we could not find elsewhere: an openly licensed, instruction-following English and French model,
-released as a stock GGUF that runs on one consumer GPU, with its Québec French results published and rerunnable.
+What this build adds: its Québec French scores were measured on the exact file you download, and every answer is
+published in the evaluation set so anyone can check them.
 
 ## Build on it
 
