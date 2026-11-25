@@ -7,9 +7,14 @@ Version 2.0 (see LICENSE). The original model carries no NOTICE file.
 
 Changes made by Humanjava Enterprises (Apache-2.0, section 4(b)):
 - Converted the language-model weights to GGUF; the vision encoder is not included.
-- Quantized the weights to a mix of standard llama.cpp 2- to 4-bit block types.
-- Further calibrated and trained the quantized weights on English and French
-  text, including text written by the original model, so the outputs stay
-  close to the original's in both languages.
+- v2: quantized the weights to standard llama.cpp K-quant mixes (Q4_K_M, Q3_K_M)
+  with an importance matrix computed on English, French and Québec French text,
+  including text written by the original model. No fine-tuning.
+- v2: replaced the embedded chat template with one that has thinking off by
+  default (the original template's enable_thinking=false path).
+- v1: quantized the weights to a mix of standard llama.cpp 2- to 4-bit block
+  types, then further calibrated and trained the quantized weights on English
+  and French text, including text written by the original model, so the
+  outputs stay close to the original's in both languages.
 
 This is an unofficial build. It is not made or endorsed by the Qwen team.

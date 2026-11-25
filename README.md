@@ -1,13 +1,14 @@
 # Qwen3.8-27B Bilingual Canadian
 
-A 9.15 GiB build of Qwen3.8-27B that works in English and French, made to run in unmodified stock llama.cpp on one
-GPU. It was calibrated and trained on English and French and measured against the original at every step.
+Qwen3.8-27B for English and French, in files that run in unmodified stock llama.cpp on one GPU. v2 is calibrated on
+English, French and Québec French text and checked against the full-size original on both languages at every step.
 
-On French web text, and on a separate Québec French judge, it stays as close to the original model as Unsloth's
-UD-Q2_K_XL file of the same size, a hair closer (KL divergence 0.0928 vs 0.0935 French, 0.0908 vs 0.0913 Québec; lower
-is closer); in English it drifts more (0.0908 vs 0.0790). On Québec French grammar judgements (COLE QFrCoLA) it scores
-0.762 (Unsloth 0.756, original 0.800); on GSM8K maths 0.954 (Unsloth 0.953). Text in, text out; uses about 10.5 GB of
-GPU memory at an 8k context.
+The 4-bit file (15.7 GiB) scores within about a point of the original on Québec French benchmarks run with the official
+COLE protocol (QFrCoLA 0.803 vs 0.802, QFrBLiMP 0.895 vs 0.895, QFrCoRE 0.894 vs 0.895, QFrCoRT 0.901 vs 0.912), on
+maths (GSM8K 0.966 vs 0.964) and on instruction following in both languages (IFEval EN 0.813 vs 0.821, FR 0.754 vs
+0.738). Its next-token predictions drift from the original by the same small amount in English, French and Québec
+French (KL divergence 0.0093 / 0.0097 / 0.0093). Long French answers keep their accents and stay in French, with up to
+24k tokens of French context, or 8k of English, in front of them. Text in, text out; the 4-bit file uses about 16.4 GB of GPU memory at an 8k context.
 
 *Unofficial build of Qwen3.8-27B by Humanjava Enterprises; not made or endorsed by the Qwen team.*
 
@@ -15,7 +16,7 @@ GPU memory at an 8k context.
 |---|---|
 | **GGUF** (llama.cpp, Ollama, LM Studio) | [HumanjavaEnterprises/Qwen3.8-27B-Bilingual-Canadian-GGUF](https://huggingface.co/HumanjavaEnterprises/Qwen3.8-27B-Bilingual-Canadian-GGUF) |
 | **Ollama** | `ollama run vveerrgg/qwen3.8-27b-bilingual-canadian` |
-| **Evaluation set** (per-file scores and task answers behind the numbers) | [HumanjavaEnterprises/bilingual-canadian-eval](https://huggingface.co/datasets/HumanjavaEnterprises/bilingual-canadian-eval) (config `v1`) |
+| **Evaluation set** (per-file scores and task answers behind the numbers) | [HumanjavaEnterprises/bilingual-canadian-eval](https://huggingface.co/datasets/HumanjavaEnterprises/bilingual-canadian-eval) (config `v2`) |
 | **Original model** (full precision, with vision) | [Qwen/Qwen3.8-27B](https://huggingface.co/Qwen/Qwen3.8-27B) |
 | **Results** | [EVALS.md](EVALS.md) |
 
@@ -23,42 +24,41 @@ GPU memory at an 8k context.
 
 | File | Size | Use |
 |---|---|---|
-| `qwen3-8-27b-bilingual-canadian-v1-Q2_K_mix.gguf` (**default**) | 9.15 GiB (9370 MiB) | one GPU with 12 GB or more (measured: 10.5 GB in Ollama at an 8k context); 16 GB leaves room for a long context |
+| `qwen3-8-27b-bilingual-canadian-v2-Q4_K_M.gguf` (**default**) | 15.69 GiB | one GPU with 24 GB (measured: 16.4 GB in Ollama at an 8k context), with room for a longer context |
+| `qwen3-8-27b-bilingual-canadian-v2-Q3_K_M.gguf` | 12.61 GiB | one GPU with 16 GB (measured: 13.6 GB in Ollama at an 8k context); close to the 4-bit file on every task, a little further from the original on text (KL 0.036-0.039) |
+| `qwen3-8-27b-bilingual-canadian-v1-Q2_K_mix.gguf` (v1) | 9.15 GiB | the v1 file, kept for 12 GB GPUs; see the v1 notes in EVALS.md |
 
-A mix of llama.cpp's standard 2- to 4-bit block types, chosen tensor by tensor. Every byte is a stock GGUF type, so
-any llama.cpp build that runs Qwen3.8 runs this file; no fork or patch needed. Verify the download with
-`sha256sum -c SHA256SUMS` from the Hugging Face repo.
+Standard llama.cpp K-quant mixes made with an importance matrix from English, French and Québec French text. Every
+byte is a stock GGUF type, so any llama.cpp build that runs Qwen3.8 runs these files; no fork or patch needed. Verify
+the download with `sha256sum -c SHA256SUMS` from the Hugging Face repo.
 
-## Quick start (Ollama)
+We tested a 2-bit file of v2 too and did not ship it: it starts repeating itself in long answers (2.3% repeated
+phrases vs 0.3% for the original). The v1 file above is the 2-bit option, tuned to avoid that.
+
+## Quick start
 
 ```bash
 ollama run vveerrgg/qwen3.8-27b-bilingual-canadian
+# or
+ollama run hf.co/HumanjavaEnterprises/Qwen3.8-27B-Bilingual-Canadian-GGUF:Q4_K_M
+# or llama.cpp
+llama-server -hf HumanjavaEnterprises/Qwen3.8-27B-Bilingual-Canadian-GGUF:Q4_K_M -ngl 99 -c 8192 -fa on --reasoning-budget 0
 ```
 
-Needs a recent Ollama (tested on 0.40.16); older releases cannot load the Qwen3.8 architecture.
+Ollama needs a recent release (tested on 0.40.16); older releases cannot load the Qwen3.8 architecture.
 
-Tags: `latest` and `q2_k_mix` move to the newest version; `v1` and `v1-q2_k_mix` never move. Or straight from
-Hugging Face: `ollama run hf.co/HumanjavaEnterprises/Qwen3.8-27B-Bilingual-Canadian-GGUF:Q2_K_mix`. To build it
-yourself, see [release/ollama/Modelfile](release/ollama/Modelfile): the GGUF alone does not carry Ollama's chat
-template, and without it the model rambles.
-
-## Quick start (llama.cpp)
-
-```bash
-pip install -U huggingface_hub
-hf download HumanjavaEnterprises/Qwen3.8-27B-Bilingual-Canadian-GGUF qwen3-8-27b-bilingual-canadian-v1-Q2_K_mix.gguf --local-dir .
-llama-server -m qwen3-8-27b-bilingual-canadian-v1-Q2_K_mix.gguf -ngl 99 -c 8192 -fa on --reasoning-budget 0 --port 8080
-curl -s localhost:8080/v1/chat/completions -H 'Content-Type: application/json' \
-  -d '{"messages":[{"role":"user","content":"Explique la différence entre un REER et un CELI en deux phrases."}]}'
-```
+Ollama tags: `latest`, `q4_k_m` and `q3_k_m` move to the newest version; `v2`, `v2-q4_k_m`, `v2-q3_k_m` (and v1's
+`v1`, `v1-q2_k_mix`) never move. To build it yourself, see [release/ollama/Modelfile](release/ollama/Modelfile): the
+GGUF alone does not carry Ollama's chat settings, and without them the model rambles.
 
 ## Versions
 
 | Version | Date | Change |
 |---|---|---|
-| **v1** (current) | 2026-11-17| First public release. |
+| **v2** (current) | 2026-11-25 | 4-bit and 3-bit files calibrated on English, French and Québec French; within about a point of the original on COLE (official protocol), GSM8K and IFEval EN/FR. |
+| v1 | 2026-11-17 | First public release: a 9.15 GiB 2-bit-class file, calibrated and trained on English and French. |
 
-Each version is a git tag (`v1`, ...) on the Hugging Face repo and this repo, a pinned Ollama tag, and a config in the
+Each version is a git tag (`v1`, `v2`) on the Hugging Face repo and this repo, a pinned Ollama tag, and a config in the
 evaluation set. Published numbers are never changed silently: a change gets a date and a one-line note.
 
 ## Prompt format
@@ -82,27 +82,40 @@ No special system prompt is needed. Ask in English or French; it answers in the 
 
 ## Results
 
-Full tables: [EVALS.md](EVALS.md). Columns: original BF16 / this build / Unsloth UD-Q2_K_XL (9.15 GiB).
+Full tables: [EVALS.md](EVALS.md).
 
-| | Original | This build | Unsloth |
-|---|---|---|---|
-| French text, KL divergence vs original (lower is closer) | 0 | 0.0928| 0.0935|
-| Québec French text, KL divergence vs original | 0 | 0.0908| 0.0913|
-| English text, KL divergence vs original | 0 | 0.0908| 0.0790|
-| Belebele FR / EN | 0.949/ 0.962| 0.947/ 0.961| 0.936/ 0.959|
-| IFEval FR / EN (prompt, strict) | 0.738/ 0.821| 0.726/ 0.806| 0.732/ 0.830|
-| MGSM FR / EN | 0.884/ 0.956| 0.892/ 0.964| 0.888/ 0.956|
-| GSM8K (5-shot) | 0.964| 0.954| 0.953|
-| COLE QFrCoLA / QFrBLiMP (Québec French grammar) | 0.800/ 0.895| 0.762/ 0.839| 0.756/ 0.879|
+| | Original BF16 | v2 4-bit | v2 3-bit | v1 (2-bit) |
+|---|---|---|---|---|
+| COLE QFrCoLA, test (official protocol) | 0.802 | 0.803 | 0.803 | 0.780 |
+| COLE QFrBLiMP, dev (official protocol) | 0.895 | 0.895 | 0.879 | 0.855 |
+| COLE QFrCoRE, test (official protocol) | 0.895 | 0.894 | 0.885 | 0.864 |
+| COLE QFrCoRT, test (official protocol) | 0.912 | 0.901 | 0.895 | 0.865 |
+| GSM8K (5-shot, flexible) | 0.964 | 0.967 | 0.964 | 0.954 |
+| MGSM EN / FR | 0.956 / 0.884 | 0.960 / 0.872 | 0.960 / 0.876 | 0.964 / 0.892 |
+| IFEval EN / FR (prompt, strict) | 0.821 / 0.738 | 0.813 / 0.754 | 0.808 / 0.736 | 0.806 / 0.726 |
+| KL divergence vs original, EN / FR / QC (lower is closer) | 0 | 0.0093 / 0.0097 / 0.0093 | 0.036 / 0.039 / 0.038 | 0.091 / 0.093 / 0.091 |
+
+COLE rows use the COLE authors' own prompts and answer format (the tool-call path), on the splits shown. MGSM, GSM8K
+and IFEval use lm-evaluation-harness through llama-server. The v1 KL figures were measured on the v1 text sets.
+
+## How we measured (and why your numbers may differ)
+
+- Stock `llama-server`, one GPU, the model's own chat template (`--jinja`), thinking off, temperature 0, seed 0.
+- COLE: the official COLE prompts and answer parsing, tool-call mode, one request at a time.
+- Other tasks: lm-evaluation-harness, chat-completions endpoint, `--apply_chat_template`.
+- **Harness settings move scores**, sometimes by many points: the chat template, stop tokens, system prompt, thinking
+  mode and sampling all matter. For example, a GGUF whose end-of-turn token is not marked as a stop token prints that
+  token at the end of every answer, and instruction-following checks then fail. Use the bundled template and the
+  settings above to reproduce our numbers, and compare models under the same harness.
 
 ## How it was built
 
 - **Base:** [Qwen/Qwen3.8-27B](https://huggingface.co/Qwen/Qwen3.8-27B) (Apache-2.0), text weights only.
-- **Calibration and training:** English and French text, including text written by the original model; no new
-  licensed datasets. Open models only.
-- **Measured against the original:** every candidate file was scored on held-out English and French text and kept
-  only if it moved closer to the BF16 original.
-- **Export:** bit-exact to stock llama.cpp GGUF types. The file loads in an unmodified llama.cpp.
+- **Calibration:** an importance matrix from English, French and Québec French text, including text written by the
+  original model. No fine-tuning in v2: the weights are the original's, quantized. Open models only.
+- **Measured against the original:** each file was scored on held-out English, French and Québec French text and on
+  the task evals above before release.
+- **Export:** stock llama.cpp `llama-quantize`, standard K-quant mixes. The files load in an unmodified llama.cpp.
 
 ## Related work
 
@@ -116,8 +129,8 @@ Full tables: [EVALS.md](EVALS.md). Columns: original BF16 / this build / Unsloth
 - [Chocolatine-2-14B-Instruct](https://huggingface.co/jpacifico/Chocolatine-2-14B-Instruct-v2.0.3): an openly licensed
   English and French instruct model with GGUF files, scored by the COLE authors at full precision.
 
-What this build adds: its Québec French scores were measured on the exact file you download, and every answer is
-published in the evaluation set so anyone can check them.
+What this build adds: its Québec French scores were measured on the exact file you download, with the COLE authors'
+own protocol, and every answer is published in the evaluation set so anyone can check them.
 
 ## Build on it
 
@@ -132,12 +145,10 @@ issues and pull requests, so the next version is better for everyone who builds 
 
 | Limitation | What to do |
 |---|---|
-| English drifts further from the original than Unsloth's same-size file (0.0908 vs 0.0790). French and Québec French are level, a hair closer. | For English-only work, Unsloth's UD-Q2_K_XL or a larger quant of the original is the better pick. |
-| French extractive question answering (copying a span from a passage: FQuAD, PIAF) is weaker than Unsloth's (.557 vs .618 F1). | Ask for a short answer in your own words, or check quoted spans against the source. Use a larger quant where exact extraction matters. |
-| It sometimes ends its turn without answering: 2 of 1,319 GSM8K items come back empty (earlier builds: up to 1 in 11). | Retry, or put few-shot examples in one user message; single questions are rarely affected. |
-| It can describe Québec's Bill 96 inaccurately: in testing it called the bill "the Charter of the French Language" (it amends that Charter) and, in French, used loaded wording about immigrants. Civic basics we checked (official languages, the bilingual province) are correct. | Check civic and legal facts against official sources, and tell us when it slips: [Model got something wrong](https://github.com/HumanjavaEnterprises/qwen3.8-27b-bilingual-canadian/issues/new?template=wrong-answer.yml). |
+| Québec civic and legal detail is unreliable: on 16 questions about Bill 96 it gets 7 right. It confuses specific rules (for example, when the government may use a language other than French with new arrivals, or what changed for English-language CEGEPs). Civic basics we checked (official languages, the bilingual province) are correct. | Check civic and legal facts against official sources, and tell us when it slips: [Model got something wrong](https://github.com/HumanjavaEnterprises/qwen3.8-27b-bilingual-canadian/issues/new?template=wrong-answer.yml). |
+| The 4-bit file needs a 24 GB GPU; the 3-bit file a 16 GB one. | On a 12 GB GPU use the v1 file (9.15 GiB). |
 | Text only: the original's image and video input is not included. | Use the original model for vision. |
-| A 2-bit-class file loses some quality against the original on every task (see Results). | Use a larger quant of the original if your GPU has room. |
+| Quantization still costs a little: QFrCoRT is 0.011 below the original on the 4-bit file, and the 3-bit file trails the 4-bit by up to 0.016 on QFrBLiMP. | Use the 4-bit file, or the original, where those points matter. |
 
 ## In this repo
 
